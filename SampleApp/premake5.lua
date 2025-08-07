@@ -10,8 +10,7 @@ project "SampleApp"
     includedirs
     {
         "../LimeStone/include",
-        "include",
-        "src"
+        "include"
     }
 
     links

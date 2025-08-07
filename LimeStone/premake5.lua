@@ -10,13 +10,14 @@ project "LimeStone"
     includedirs
     {
         "include/LimeStone",
-        "../vendor/glfw-3.4.bin.WIN64/include",
-        "src"
+        "$(VULKAN_SDK)/Include",
+        "vendor/glfw-3.4.bin.WIN64/include"
     }
 
     links 
     {
-        "../vendor/glfw-3.4.bin.WIN64/lib-vc2022/glfw3.lib"
+        "$(VULKAN_SDK)/Lib/vulkan-1.lib",
+        "vendor/glfw-3.4.bin.WIN64/lib-vc2022/glfw3.lib"
     }
 
     targetdir ("../bin/" .. OutputDir .. "/%{prj.name}")

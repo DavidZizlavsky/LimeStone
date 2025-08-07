@@ -1,3 +1,9 @@
+local vulkan_sdk = os.getenv("VULKAN_SDK")
+
+if not vulkan_sdk then
+    error("VULKAN_SDK environment variable not set! Please install Vulkan SDK.")
+end
+
 workspace "LimeStone"
     architecture "x64"
     configurations { "Debug", "Release", "Dist" }
