@@ -6,6 +6,10 @@ namespace LimeStone {
 	class Application {
 	private:
 		GLFWwindow* m_window = nullptr;
+		VkInstance m_vkInstance = nullptr;
+
+		void initVulkan();
+		bool checkValidationLayerSupport();
 	public:
 		Application();
 		~Application();
