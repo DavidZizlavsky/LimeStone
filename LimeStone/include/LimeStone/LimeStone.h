@@ -1,7 +1,13 @@
 #pragma once
+#include <GLFW/glfw3.h>
+#include <vulkan/vulkan.h>
 
-namespace LimeStone
-{
-	void printTest();
-	void showWindow();
+namespace LimeStone {
+	class Application {
+	private:
+		GLFWwindow* m_window = nullptr;
+	public:
+		Application();
+		~Application();
+	};
 }
