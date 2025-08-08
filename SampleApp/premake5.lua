@@ -10,12 +10,16 @@ project "SampleApp"
     includedirs
     {
         "../LimeStone/include",
-        "include"
+        "include",
+        "$(VULKAN_SDK)/Include", -- Needs to be removed later
+        "../LimeStone/vendor/glfw-3.4.bin.WIN64/include" -- Needs to be removed later
     }
 
     links
     {
-        "LimeStone"
+        "LimeStone",
+        "$(VULKAN_SDK)/Lib/vulkan-1.lib", -- Needs to be removed later
+        "../LimeStone/vendor/glfw-3.4.bin.WIN64/lib-vc2022/glfw3.lib" -- Needs to be removed later
     }
 
     targetdir ("../bin/" .. OutputDir .. "/%{prj.name}")

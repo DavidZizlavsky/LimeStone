@@ -1,54 +1,29 @@
-#include "LimeStone.h"
-#include <iostream>
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
+#include <iostream>
 
-namespace LimeStone 
-{
-	void printTest()
-	{
-		std::cout << "Hello from LimeStone!" << std::endl;
-	}
+#include "LimeStone.h"
 
-	void showWindow()
-	{
+namespace LimeStone {
+	const uint32_t WIDTH = 800;
+	const uint32_t HEIGHT = 500;
+
+	Application::Application() {
 		glfwInit();
-		GLFWwindow* window = glfwCreateWindow(500, 500, "Test", nullptr, nullptr);
-		
-		VkApplicationInfo appInfo{};
-		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "VulkanInitTest";
-		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.pEngineName = "NoEngine";
-		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_3;
 
-		VkInstanceCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-		createInfo.pApplicationInfo = &appInfo;
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-		VkInstance instance;
-		VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
+		m_window = glfwCreateWindow(WIDTH, HEIGHT, "LimeStone - application", nullptr, nullptr);
 
-		if (result != VK_SUCCESS) {
-			std::cerr << "Failed to create Vulkan instance! Error code: " << result << std::endl;
-		}
-
-		uint32_t deviceCount = 0;
-		vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
-
-		if (deviceCount == 0) {
-			std::cerr << "No Vulkan-compatible GPUs found!" << std::endl;
-		}
-		else {
-			std::cout << "Found " << deviceCount << " Vulkan-capable device(s):" << std::endl;
-		}
-
-		while (!glfwWindowShouldClose(window))
-		{
+		while (!glfwWindowShouldClose(m_window)) {
 			glfwPollEvents();
 		}
-		vkDestroyInstance(instance, nullptr);
+	}
+
+	Application::~Application() {
+		glfwDestroyWindow(m_window);
+
 		glfwTerminate();
 	}
 }
