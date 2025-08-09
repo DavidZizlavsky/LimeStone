@@ -54,16 +54,14 @@ namespace LimeStone {
 		appInfo.pEngineName = ENGINE_NAME;
 		appInfo.engineVersion = ENGINE_VERSION;
 		appInfo.apiVersion = VULKAN_API_VERSION;
-		
-		uint32_t glfwExtensionCount = 0;
-		const char** glfwExtensions;
-		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+		std::vector<const char*> extensions = getRequiredExtensions();
 
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
-		createInfo.enabledExtensionCount = glfwExtensionCount;
-		createInfo.ppEnabledExtensionNames = glfwExtensions;
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());;
+		createInfo.ppEnabledExtensionNames = extensions.data();
 		if (enableValidationLayers) {
 			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 			createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -78,9 +76,43 @@ namespace LimeStone {
 		}
 
 		std::cout << "Vulkan instance created successfully!" << std::endl;
+
+		if (enableValidationLayers) {
+			VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+			debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+			debugCreateInfo.messageSeverity =
+				VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+				VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+				VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+			debugCreateInfo.messageType = 
+				VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | 
+				VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | 
+				VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+			debugCreateInfo.pfnUserCallback = debugCallback;
+			debugCreateInfo.pUserData = nullptr;
+
+			auto funcCreateDebugMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_vkInstance, "vkCreateDebugUtilsMessengerEXT");
+			if (funcCreateDebugMessenger == nullptr) {
+				std::cerr << "Debug Utils Messenger function could not be loaded!" << std::endl;
+				throw std::runtime_error("Failed to initialized Debug Utils Messenger!");
+			}
+
+			VkResult debugMessengerResult = funcCreateDebugMessenger(m_vkInstance, &debugCreateInfo, nullptr, &m_vkDebugMessenger);
+			if (debugMessengerResult != VK_SUCCESS) {
+				std::cerr << "Failed to create debug messenger!" << std::endl;
+				throw std::runtime_error("Failed to initialized Debug Utils Messenger!");
+			}
+		}
 	}
 	
 	Application::~Application() {
+		if (enableValidationLayers) {
+			auto funcDestroyDebugMessenger = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_vkInstance, "vkDestroyDebugUtilsMessengerEXT");
+			if (funcDestroyDebugMessenger != nullptr) {
+				funcDestroyDebugMessenger(m_vkInstance, m_vkDebugMessenger, nullptr);
+			}
+		}
+
 		vkDestroyInstance(m_vkInstance, nullptr);
 
 		glfwDestroyWindow(m_window);
@@ -110,5 +142,28 @@ namespace LimeStone {
 			}
 		}
 		return true;
+	}
+
+	std::vector<const char*> Application::getRequiredExtensions() {
+		uint32_t glfwExtensionCount = 0;
+		const char** glfwExtensions;
+		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+		if (enableValidationLayers) {
+			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		}
+
+		return extensions;
+	}
+
+	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+		VkDebugUtilsMessageTypeFlagsEXT messageType,
+		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+		void* pUserData) {
+		std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl;
+
+		return VK_FALSE;
 	}
 }
