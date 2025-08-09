@@ -103,6 +103,34 @@ namespace LimeStone {
 				throw std::runtime_error("Failed to initialized Debug Utils Messenger!");
 			}
 		}
+
+		uint32_t physicalDeviceCount = 0;
+		vkEnumeratePhysicalDevices(m_vkInstance, &physicalDeviceCount, nullptr);
+		std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+		vkEnumeratePhysicalDevices(m_vkInstance, &physicalDeviceCount, physicalDevices.data());
+		if (physicalDeviceCount == 0) {
+			throw std::runtime_error("Failed to find GPUs with Vulkan support!");
+		}
+		std::cout << "Physical devices available: " << std::endl;
+		uint32_t maxMemory = 0;
+		for (const VkPhysicalDevice& device : physicalDevices) {
+			VkPhysicalDeviceProperties deviceProperties;
+			vkGetPhysicalDeviceProperties(device, &deviceProperties);
+			uint32_t memory = deviceProperties.limits.maxMemoryAllocationCount;
+			std::cout << "- " << deviceProperties.deviceName << " - " << memory << std::endl;
+			if (memory > maxMemory) {
+				maxMemory = memory;
+				m_vkPhysicalDevice = device;
+			}
+		}
+
+		if (m_vkPhysicalDevice == nullptr) {
+			throw std::runtime_error("Failed to find a valid GPU!");
+		}
+
+		VkPhysicalDeviceProperties deviceProperties;
+		vkGetPhysicalDeviceProperties(m_vkPhysicalDevice, &deviceProperties);
+		std::cout << "Selected: " << deviceProperties.deviceName << std::endl;
 	}
 	
 	Application::~Application() {

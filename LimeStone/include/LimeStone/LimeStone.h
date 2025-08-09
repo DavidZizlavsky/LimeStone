@@ -8,11 +8,13 @@ namespace LimeStone {
 		VkDebugUtilsMessageTypeFlagsEXT messageType, 
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, 
 		void* pUserData);
+
 	class Application {
 	private:
 		GLFWwindow* m_window = nullptr;
 		VkInstance m_vkInstance = nullptr;
 		VkDebugUtilsMessengerEXT m_vkDebugMessenger = nullptr;
+		VkPhysicalDevice m_vkPhysicalDevice = nullptr;
 
 		void initVulkan();
 		bool checkValidationLayerSupport();
