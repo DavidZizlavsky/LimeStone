@@ -2,8 +2,13 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <vector>
+#include <optional>
 
 namespace LimeStone {
+	struct QueueFamilyIndices {
+		std::optional<uint32_t> graphicsFamily;
+	};
+
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, 
 		VkDebugUtilsMessageTypeFlagsEXT messageType, 
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, 
@@ -19,7 +24,7 @@ namespace LimeStone {
 		void initVulkan();
 		bool checkValidationLayerSupport();
 		std::vector<const char*> getRequiredExtensions();
-		
+		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 	public:
 		Application();
 		~Application();
