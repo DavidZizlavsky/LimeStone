@@ -20,6 +20,8 @@ namespace LimeStone {
 		VkInstance m_vkInstance = nullptr;
 		VkDebugUtilsMessengerEXT m_vkDebugMessenger = nullptr;
 		VkPhysicalDevice m_vkPhysicalDevice = nullptr;
+		VkDevice m_vkDevice = nullptr;
+		VkQueue m_vkGraphicsQueue = nullptr;
 
 		void initVulkan();
 		bool checkValidationLayerSupport();
