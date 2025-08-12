@@ -7,6 +7,7 @@
 namespace LimeStone {
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily;
+		std::optional<uint32_t> presentFamily;
 	};
 
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, 
@@ -22,6 +23,7 @@ namespace LimeStone {
 		VkPhysicalDevice m_vkPhysicalDevice = nullptr;
 		VkDevice m_vkDevice = nullptr;
 		VkQueue m_vkGraphicsQueue = nullptr;
+		VkSurfaceKHR m_vkSurface = nullptr;
 
 		void initVulkan();
 		bool checkValidationLayerSupport();

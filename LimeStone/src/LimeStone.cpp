@@ -1,3 +1,4 @@
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <iostream>
@@ -104,6 +105,10 @@ namespace LimeStone {
 			}
 		}
 
+		if (glfwCreateWindowSurface(m_vkInstance, m_window, nullptr, &m_vkSurface) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create window surface!");
+		}
+
 		uint32_t physicalDeviceCount = 0;
 		vkEnumeratePhysicalDevices(m_vkInstance, &physicalDeviceCount, nullptr);
 		std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
@@ -134,6 +139,9 @@ namespace LimeStone {
 
 		QueueFamilyIndices indices = findQueueFamilies(m_vkPhysicalDevice);
 		if (!indices.graphicsFamily.has_value()) {
+			throw std::runtime_error("Graphics family not found!");
+		}
+		if (!indices.presentFamily.has_value()) {
 			throw std::runtime_error("Graphics family not found!");
 		}
 
@@ -179,10 +187,10 @@ namespace LimeStone {
 			}
 		}
 
+		vkDestroySurfaceKHR(m_vkInstance, m_vkSurface, nullptr);
 		vkDestroyInstance(m_vkInstance, nullptr);
 
 		glfwDestroyWindow(m_window);
-
 		glfwTerminate();
 	}
 
@@ -246,6 +254,11 @@ namespace LimeStone {
 		for (const auto& queueFamily : queueFamilies) {
 			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
 				indices.graphicsFamily = i;
+				VkBool32 presentSupport = false;
+				vkGetPhysicalDeviceSurfaceSupportKHR(m_vkPhysicalDevice, i, m_vkSurface, &presentSupport);
+				if (presentSupport) {
+					indices.presentFamily = i;
+				}
 			}
 			i++;
 		}
