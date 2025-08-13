@@ -23,6 +23,7 @@ namespace LimeStone {
 		VkPhysicalDevice m_vkPhysicalDevice = nullptr;
 		VkDevice m_vkDevice = nullptr;
 		VkQueue m_vkGraphicsQueue = nullptr;
+		VkQueue m_vkPresentQueue = nullptr;
 		VkSurfaceKHR m_vkSurface = nullptr;
 
 		void initVulkan();

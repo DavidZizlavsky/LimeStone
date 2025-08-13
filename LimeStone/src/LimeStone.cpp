@@ -159,8 +159,8 @@ namespace LimeStone {
 		deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
 		deviceCreateInfo.queueCreateInfoCount = 1;
 		deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-
 		deviceCreateInfo.enabledExtensionCount = 0;
+		deviceCreateInfo.queueCreateInfoCount = 1;
 
 		if (enableValidationLayers) {
 			deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
@@ -175,6 +175,7 @@ namespace LimeStone {
 		}
 
 		vkGetDeviceQueue(m_vkDevice, indices.graphicsFamily.value(), 0, &m_vkGraphicsQueue);
+		indices.presentFamily.value() = indices.graphicsFamily.value();
 	}
 	
 	Application::~Application() {
@@ -254,6 +255,7 @@ namespace LimeStone {
 		for (const auto& queueFamily : queueFamilies) {
 			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
 				indices.graphicsFamily = i;
+				// TODO: present support can be a part of a different queue family
 				VkBool32 presentSupport = false;
 				vkGetPhysicalDeviceSurfaceSupportKHR(m_vkPhysicalDevice, i, m_vkSurface, &presentSupport);
 				if (presentSupport) {
