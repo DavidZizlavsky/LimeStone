@@ -3,6 +3,8 @@
 #include <vulkan/vulkan.h>
 #include <iostream>
 #include <vector>
+#include <set>
+#include <string>
 
 #include "LimeStone.h"
 
@@ -14,6 +16,7 @@ namespace LimeStone {
 	const bool enableValidationLayers = false;
 #endif
 	const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+	const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 	
 	// Default window size
 	const uint32_t WIDTH = 800;
@@ -122,7 +125,23 @@ namespace LimeStone {
 			VkPhysicalDeviceProperties deviceProperties;
 			vkGetPhysicalDeviceProperties(device, &deviceProperties);
 			uint32_t memory = deviceProperties.limits.maxMemoryAllocationCount;
-			std::cout << "- " << deviceProperties.deviceName << " - " << memory << std::endl;
+			uint32_t extensionCount;
+			vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+			std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+			vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+			std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+			for (const auto& extension : availableExtensions) {
+				requiredExtensions.erase(extension.extensionName);
+			}
+
+			std::cout << "- " << deviceProperties.deviceName << " - " << memory;
+			if (!requiredExtensions.empty()) {
+				std::cout << " (Extensions not supported)" << std::endl;
+				continue;
+			}
+			std::cout << std::endl;
+
 			if (memory > maxMemory) {
 				maxMemory = memory;
 				m_vkPhysicalDevice = device;
@@ -159,7 +178,8 @@ namespace LimeStone {
 		deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
 		deviceCreateInfo.queueCreateInfoCount = 1;
 		deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-		deviceCreateInfo.enabledExtensionCount = 0;
+		deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+		deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
 		deviceCreateInfo.queueCreateInfoCount = 1;
 
 		if (enableValidationLayers) {
