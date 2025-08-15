@@ -10,6 +10,12 @@ namespace LimeStone {
 		std::optional<uint32_t> presentFamily;
 	};
 
+	struct SwapChainSupportDetails {
+		VkSurfaceCapabilitiesKHR capabilities;
+		std::vector<VkSurfaceFormatKHR> formats;
+		std::vector<VkPresentModeKHR> presentModes;
+	};
+
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, 
 		VkDebugUtilsMessageTypeFlagsEXT messageType, 
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, 
@@ -30,6 +36,7 @@ namespace LimeStone {
 		bool checkValidationLayerSupport();
 		std::vector<const char*> getRequiredExtensions();
 		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 	public:
 		Application();
 		~Application();

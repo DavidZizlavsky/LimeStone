@@ -139,6 +139,12 @@ namespace LimeStone {
 			if (!requiredExtensions.empty()) {
 				std::cout << " (Extensions not supported)" << std::endl;
 				continue;
+			}			
+
+			SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+			if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty()) {
+				std::cout << " (Swap chain not supported)" << std::endl;
+				continue;
 			}
 			std::cout << std::endl;
 
@@ -286,5 +292,27 @@ namespace LimeStone {
 		}
 
 		return indices;
+	}
+
+	SwapChainSupportDetails Application::querySwapChainSupport(VkPhysicalDevice device) {
+		SwapChainSupportDetails details;
+
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_vkSurface, &details.capabilities);
+
+		uint32_t formatCount;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_vkSurface, &formatCount, nullptr);
+		if (formatCount > 0) {
+			details.formats.resize(formatCount);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_vkSurface, &formatCount, details.formats.data());
+		}
+		
+		uint32_t presentModeCount;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_vkSurface, &presentModeCount, nullptr);
+		if (presentModeCount > 0) {
+			details.presentModes.resize(presentModeCount);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_vkSurface, &presentModeCount, details.presentModes.data());
+		}
+
+		return details;
 	}
 }
