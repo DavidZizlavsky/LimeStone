@@ -39,8 +39,8 @@ namespace LimeStone {
 		void initVulkan();
 		bool checkValidationLayerSupport();
 		std::vector<const char*> getRequiredExtensions();
-		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+		const QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice device);
+		const SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice device);
 		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
