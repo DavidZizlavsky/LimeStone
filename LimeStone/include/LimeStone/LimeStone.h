@@ -11,7 +11,7 @@ namespace LimeStone {
 	};
 
 	struct SwapChainSupportDetails {
-		VkSurfaceCapabilitiesKHR capabilities;
+		VkSurfaceCapabilitiesKHR capabilities{};
 		std::vector<VkSurfaceFormatKHR> formats;
 		std::vector<VkPresentModeKHR> presentModes;
 	};
@@ -31,6 +31,7 @@ namespace LimeStone {
 		VkQueue m_vkGraphicsQueue = nullptr;
 		VkQueue m_vkPresentQueue = nullptr;
 		VkSurfaceKHR m_vkSurface = nullptr;
+		VkSwapchainKHR m_vkSwapchain = nullptr;
 
 		void initVulkan();
 		bool checkValidationLayerSupport();

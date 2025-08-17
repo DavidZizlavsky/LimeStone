@@ -205,9 +205,53 @@ namespace LimeStone {
 
 		vkGetDeviceQueue(m_vkDevice, indices.graphicsFamily.value(), 0, &m_vkGraphicsQueue);
 		indices.presentFamily.value() = indices.graphicsFamily.value();
+
+		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(m_vkPhysicalDevice);
+		VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+		VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+		VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+
+		uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+		if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
+			imageCount = swapChainSupport.capabilities.maxImageCount;
+		}
+
+		VkSwapchainCreateInfoKHR swapChainCreateInfo{};
+		swapChainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+		swapChainCreateInfo.surface = m_vkSurface;
+		swapChainCreateInfo.minImageCount = imageCount;
+		swapChainCreateInfo.imageFormat = surfaceFormat.format;
+		swapChainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
+		swapChainCreateInfo.imageExtent = extent;
+		swapChainCreateInfo.imageArrayLayers = 1;
+		swapChainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+		uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+		if (indices.graphicsFamily != indices.presentFamily) {
+			swapChainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+			swapChainCreateInfo.queueFamilyIndexCount = 2;
+			swapChainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
+		}
+		else {
+			swapChainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			swapChainCreateInfo.queueFamilyIndexCount = 0; // Optional
+			swapChainCreateInfo.pQueueFamilyIndices = nullptr; // Optional
+		}
+
+		swapChainCreateInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+		swapChainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+		swapChainCreateInfo.presentMode = presentMode;
+		swapChainCreateInfo.clipped = VK_TRUE;
+		swapChainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+
+		if (vkCreateSwapchainKHR(m_vkDevice, &swapChainCreateInfo, nullptr, &m_vkSwapchain) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create swapchain!");
+		}
 	}
 	
 	Application::~Application() {
+		vkDestroySwapchainKHR(m_vkDevice, m_vkSwapchain, nullptr);
+
 		vkDestroyDevice(m_vkDevice, nullptr);
 
 		if (enableValidationLayers) {
