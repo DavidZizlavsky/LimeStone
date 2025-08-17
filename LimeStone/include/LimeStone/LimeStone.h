@@ -32,6 +32,9 @@ namespace LimeStone {
 		VkQueue m_vkPresentQueue = nullptr;
 		VkSurfaceKHR m_vkSurface = nullptr;
 		VkSwapchainKHR m_vkSwapchain = nullptr;
+		std::vector<VkImage> m_vkSwapchainImages;
+		VkFormat m_vkSwapchainImageFormat;
+		VkExtent2D m_vkSwapchainExtent;
 
 		void initVulkan();
 		bool checkValidationLayerSupport();

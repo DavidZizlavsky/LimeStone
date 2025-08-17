@@ -247,6 +247,12 @@ namespace LimeStone {
 		if (vkCreateSwapchainKHR(m_vkDevice, &swapChainCreateInfo, nullptr, &m_vkSwapchain) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create swapchain!");
 		}
+
+		vkGetSwapchainImagesKHR(m_vkDevice, m_vkSwapchain, &imageCount, nullptr);
+		m_vkSwapchainImages.resize(imageCount);
+		vkGetSwapchainImagesKHR(m_vkDevice, m_vkSwapchain, &imageCount, m_vkSwapchainImages.data());
+		m_vkSwapchainImageFormat = surfaceFormat.format;
+		m_vkSwapchainExtent = extent;
 	}
 	
 	Application::~Application() {
