@@ -35,6 +35,7 @@ namespace LimeStone {
 		std::vector<VkImage> m_vkSwapchainImages;
 		VkFormat m_vkSwapchainImageFormat;
 		VkExtent2D m_vkSwapchainExtent;
+		std::vector<VkImageView> m_vkSwapchainImageViews;
 
 		void initVulkan();
 		bool checkValidationLayerSupport();
