@@ -28,6 +28,7 @@ project "SampleApp"
     filter "system:windows"
         systemversion "latest"
         defines { "WINDOWS" }
+	linkoptions { "/NODEFAULTLIB:msvcrt.lib" }
         
     filter "configurations:Debug"
         defines { "DEBUG" }
