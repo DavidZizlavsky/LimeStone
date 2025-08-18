@@ -347,7 +347,7 @@ namespace LimeStone {
 		return VK_FALSE;
 	}
 
-	const QueueFamilyIndices Application::findQueueFamilies(const VkPhysicalDevice device) {
+	QueueFamilyIndices Application::findQueueFamilies(const VkPhysicalDevice device) const {
 		QueueFamilyIndices indices;
 		
 		uint32_t queueFamilyCount = 0;
@@ -373,7 +373,7 @@ namespace LimeStone {
 		return indices;
 	}
 
-	const SwapChainSupportDetails Application::querySwapChainSupport(const VkPhysicalDevice device) {
+	SwapChainSupportDetails Application::querySwapChainSupport(const VkPhysicalDevice device) const {
 		SwapChainSupportDetails details;
 
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_vkSurface, &details.capabilities);
