@@ -5,7 +5,7 @@ project "LimeStone"
     targetdir "bin/%{cfg.buildcfg}"
     staticruntime "off"
 
-    files { "**.h", "**.hpp", "**.cpp" }
+    files { "**.h", "**.hpp", "**.cpp", "**.vert", "**.frag" }
 
     includedirs
     {
