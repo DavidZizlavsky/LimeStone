@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <set>
 #include <string>
@@ -430,5 +431,22 @@ namespace LimeStone {
 			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 			return actualExtent;
 		}
+	}
+
+	static std::vector<char> readFile(const std::string& filename) {
+		std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+		if (!file.is_open()) {
+			throw std::runtime_error("Failed to open file! Filename: " + filename);
+		}
+
+		size_t fileSize = (size_t) file.tellg();
+		std::vector<char> buffer(fileSize);
+
+		file.seekg(0);
+		file.read(buffer.data(), fileSize);
+		file.close();
+
+		return buffer;
 	}
 }
