@@ -6,3 +6,5 @@
 *.vcxproj
 *.vcxproj.user
 *.vcxproj.filters
+
+*.spv
