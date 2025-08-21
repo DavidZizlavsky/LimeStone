@@ -26,6 +26,9 @@ project "LimeStone"
     filter "system:windows"
         systemversion "latest"
         defines { "WINDOWS" }
+        postbuildcommands {
+            "{COPY} %[shaders] %[../bin/" .. OutputDir .. "/SampleApp/shaders]"
+        }
         
     filter "configurations:Debug"
         defines { "DEBUG" }

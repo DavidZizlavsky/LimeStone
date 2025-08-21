@@ -25,6 +25,7 @@ namespace LimeStone {
 
 	class Application {
 	private:
+		std::string m_exeDirPath;
 		GLFWwindow* m_window = nullptr;
 		VkInstance m_vkInstance = nullptr;
 		VkDebugUtilsMessengerEXT m_vkDebugMessenger = nullptr;
@@ -47,8 +48,9 @@ namespace LimeStone {
 		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+		VkShaderModule createShaderModule(const std::vector<char>& code) const;
 	public:
-		Application();
+		Application(std::string executableDir);
 		~Application();
 	};
 }

@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <limits>
 #include <algorithm>
+#include <filesystem>
 
 #include "LimeStone.h"
 
@@ -33,7 +34,8 @@ namespace LimeStone {
 	const uint32_t ENGINE_VERSION = VK_MAKE_VERSION(1, 0, 0);
 	const uint32_t VULKAN_API_VERSION = VK_API_VERSION_1_0;
 
-	Application::Application() {
+	Application::Application(std::string executableDir) {
+		m_exeDirPath = executableDir;
 		glfwInit();
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -65,6 +67,8 @@ namespace LimeStone {
 
 		std::vector<const char*> extensions = getRequiredExtensions();
 
+		// Instance creation:
+
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
@@ -85,6 +89,7 @@ namespace LimeStone {
 
 		std::cout << "Vulkan instance created successfully!" << std::endl;
 
+		// Validation layers creation:
 		if (enableValidationLayers) {
 			VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
 			debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -115,6 +120,8 @@ namespace LimeStone {
 		if (glfwCreateWindowSurface(m_vkInstance, m_window, nullptr, &m_vkSurface) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create window surface!");
 		}
+
+		// Selecting physical device:
 
 		uint32_t physicalDeviceCount = 0;
 		vkEnumeratePhysicalDevices(m_vkInstance, &physicalDeviceCount, nullptr);
@@ -174,6 +181,8 @@ namespace LimeStone {
 			throw std::runtime_error("Graphics family not found!");
 		}
 
+		// Device queue creation:
+
 		float queuePriority = 1.0f;
 		VkDeviceQueueCreateInfo queueCreateInfo{};
 		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -203,6 +212,8 @@ namespace LimeStone {
 		if (vkCreateDevice(m_vkPhysicalDevice, &deviceCreateInfo, nullptr, &m_vkDevice) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create logical device!");
 		}
+
+		// Swap chain creation:
 
 		vkGetDeviceQueue(m_vkDevice, indices.graphicsFamily.value(), 0, &m_vkGraphicsQueue);
 		indices.presentFamily.value() = indices.graphicsFamily.value();
@@ -276,6 +287,18 @@ namespace LimeStone {
 				throw std::runtime_error("Failed to create image view!");
 			}
 		}
+
+		// Graphics pipeline creation:
+		auto vertShaderCode = readFile(m_exeDirPath + "/shaders/vert.spv");
+		auto fragShaderCode = readFile(m_exeDirPath + "/shaders/frag.spv");
+
+		VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+		VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+		// TODO: Continue here
+
+		vkDestroyShaderModule(m_vkDevice, fragShaderModule, nullptr);
+		vkDestroyShaderModule(m_vkDevice, vertShaderModule, nullptr);
 	}
 	
 	Application::~Application() {
@@ -448,5 +471,18 @@ namespace LimeStone {
 		file.close();
 
 		return buffer;
+	}
+
+	VkShaderModule Application::createShaderModule(const std::vector<char>& code) const {
+		VkShaderModuleCreateInfo shaderModuleCreateInfo{};
+		shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		shaderModuleCreateInfo.codeSize = code.size();
+		shaderModuleCreateInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+		VkShaderModule shaderModule;
+		if (vkCreateShaderModule(m_vkDevice, &shaderModuleCreateInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create shader module!");
+		}
+		return shaderModule;
 	}
 }
