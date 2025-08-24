@@ -307,6 +307,17 @@ namespace LimeStone {
 		fragShaderStageInfo.module = fragShaderModule;
 		fragShaderStageInfo.pName = "main";
 
+		// Dynamic state creation:
+		std::vector<VkDynamicState> dynamicStates = {
+			VK_DYNAMIC_STATE_VIEWPORT,
+			VK_DYNAMIC_STATE_SCISSOR
+		};
+
+		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
+		dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+		dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
+
 		// Destroying shader modules:
 		vkDestroyShaderModule(m_vkDevice, fragShaderModule, nullptr);
 		vkDestroyShaderModule(m_vkDevice, vertShaderModule, nullptr);
