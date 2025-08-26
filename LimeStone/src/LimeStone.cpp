@@ -341,6 +341,11 @@ namespace LimeStone {
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
+		// Scissor
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = m_vkSwapchainExtent;
+
 		// Destroying shader modules:
 		vkDestroyShaderModule(m_vkDevice, fragShaderModule, nullptr);
 		vkDestroyShaderModule(m_vkDevice, vertShaderModule, nullptr);
