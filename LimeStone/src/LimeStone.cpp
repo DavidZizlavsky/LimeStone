@@ -400,12 +400,26 @@ namespace LimeStone {
 		colorBlending.blendConstants[2] = 0.0f;
 		colorBlending.blendConstants[3] = 0.0f;
 
+		// Pipeline layout
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount = 0;
+		pipelineLayoutInfo.pSetLayouts = nullptr;
+		pipelineLayoutInfo.pushConstantRangeCount = 0;
+		pipelineLayoutInfo.pPushConstantRanges = nullptr;
+
+		if (vkCreatePipelineLayout(m_vkDevice, &pipelineLayoutInfo, nullptr, &m_vkPipelineLayout) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create pipeline layout!");
+		}
+
 		// Destroying shader modules:
 		vkDestroyShaderModule(m_vkDevice, fragShaderModule, nullptr);
 		vkDestroyShaderModule(m_vkDevice, vertShaderModule, nullptr);
 	}
 	
 	Application::~Application() {
+		vkDestroyPipelineLayout(m_vkDevice, m_vkPipelineLayout, nullptr);
+
 		for (auto imageView : m_vkSwapchainImageViews) {
 			vkDestroyImageView(m_vkDevice, imageView, nullptr);
 		}
