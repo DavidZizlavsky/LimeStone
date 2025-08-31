@@ -288,6 +288,17 @@ namespace LimeStone {
 			}
 		}
 
+		// Render pass:
+		VkAttachmentDescription colorAttachment{};
+		colorAttachment.format = m_vkSwapchainImageFormat;
+		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
 		// Graphics pipeline creation:
 		auto vertShaderCode = readFile(m_exeDirPath + "/shaders/vert.spv");
 		auto fragShaderCode = readFile(m_exeDirPath + "/shaders/frag.spv");
