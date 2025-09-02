@@ -42,6 +42,16 @@ namespace LimeStone {
 		std::vector<VkImageView> m_vkSwapchainImageViews;
 
 		void initVulkan();
+		void createInstance();
+		void setupDebugMessenger();
+		void createSurface();
+		void pickPhysicalDevice();
+		void createLogicalDevice();
+		void createSwapChain();
+		void createImageViews();
+		void createRenderPass();
+		void createGraphicsPipeline();
+
 		bool checkValidationLayerSupport();
 		std::vector<const char*> getRequiredExtensions();
 		QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice device) const;

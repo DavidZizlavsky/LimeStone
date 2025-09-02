@@ -51,6 +51,18 @@ namespace LimeStone {
 	}
 
 	void Application::initVulkan() {
+		createInstance();
+		setupDebugMessenger();
+		createSurface();
+		pickPhysicalDevice();
+		createLogicalDevice();
+		createSwapChain();
+		createImageViews();
+		createRenderPass();
+		createGraphicsPipeline();
+	}
+
+	void Application::createInstance() {
 		std::cout << "Initializing Vulkan!" << std::endl;
 
 		if (enableValidationLayers && !checkValidationLayerSupport()) {
@@ -67,8 +79,6 @@ namespace LimeStone {
 
 		std::vector<const char*> extensions = getRequiredExtensions();
 
-		// Instance creation:
-
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
@@ -81,15 +91,16 @@ namespace LimeStone {
 		else {
 			createInfo.enabledLayerCount = 0;
 		}
-		
+
 		VkResult result = vkCreateInstance(&createInfo, nullptr, &m_vkInstance);
 		if (result != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create VkInstance!");
 		}
 
 		std::cout << "Vulkan instance created successfully!" << std::endl;
+	}
 
-		// Validation layers creation:
+	void Application::setupDebugMessenger() {
 		if (enableValidationLayers) {
 			VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
 			debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -97,9 +108,9 @@ namespace LimeStone {
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-			debugCreateInfo.messageType = 
-				VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | 
-				VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | 
+			debugCreateInfo.messageType =
+				VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+				VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
 				VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 			debugCreateInfo.pfnUserCallback = debugCallback;
 			debugCreateInfo.pUserData = nullptr;
@@ -116,13 +127,15 @@ namespace LimeStone {
 				throw std::runtime_error("Failed to initialized Debug Utils Messenger!");
 			}
 		}
+	}
 
+	void Application::createSurface() {
 		if (glfwCreateWindowSurface(m_vkInstance, m_window, nullptr, &m_vkSurface) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create window surface!");
 		}
+	}
 
-		// Selecting physical device:
-
+	void Application::pickPhysicalDevice() {
 		uint32_t physicalDeviceCount = 0;
 		vkEnumeratePhysicalDevices(m_vkInstance, &physicalDeviceCount, nullptr);
 		std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
@@ -150,7 +163,7 @@ namespace LimeStone {
 			if (!requiredExtensions.empty()) {
 				std::cout << " (Extensions not supported)" << std::endl;
 				continue;
-			}			
+			}
 
 			SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
 			if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty()) {
@@ -172,7 +185,9 @@ namespace LimeStone {
 		VkPhysicalDeviceProperties deviceProperties;
 		vkGetPhysicalDeviceProperties(m_vkPhysicalDevice, &deviceProperties);
 		std::cout << "Selected: " << deviceProperties.deviceName << std::endl;
+	}
 
+	void Application::createLogicalDevice() {
 		QueueFamilyIndices indices = findQueueFamilies(m_vkPhysicalDevice);
 		if (!indices.graphicsFamily.has_value()) {
 			throw std::runtime_error("Graphics family not found!");
@@ -180,8 +195,6 @@ namespace LimeStone {
 		if (!indices.presentFamily.has_value()) {
 			throw std::runtime_error("Graphics family not found!");
 		}
-
-		// Device queue creation:
 
 		float queuePriority = 1.0f;
 		VkDeviceQueueCreateInfo queueCreateInfo{};
@@ -213,11 +226,11 @@ namespace LimeStone {
 			throw std::runtime_error("Failed to create logical device!");
 		}
 
-		// Swap chain creation:
-
 		vkGetDeviceQueue(m_vkDevice, indices.graphicsFamily.value(), 0, &m_vkGraphicsQueue);
 		indices.presentFamily.value() = indices.graphicsFamily.value();
+	}
 
+	void Application::createSwapChain() {
 		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(m_vkPhysicalDevice);
 		VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 		VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -238,6 +251,7 @@ namespace LimeStone {
 		swapChainCreateInfo.imageArrayLayers = 1;
 		swapChainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
+		auto indices = findQueueFamilies(m_vkPhysicalDevice);
 		uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 		if (indices.graphicsFamily != indices.presentFamily) {
 			swapChainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -265,7 +279,9 @@ namespace LimeStone {
 		vkGetSwapchainImagesKHR(m_vkDevice, m_vkSwapchain, &imageCount, m_vkSwapchainImages.data());
 		m_vkSwapchainImageFormat = surfaceFormat.format;
 		m_vkSwapchainExtent = extent;
+	}
 
+	void Application::createImageViews() {
 		m_vkSwapchainImageViews.resize(m_vkSwapchainImages.size());
 		for (size_t i = 0; i < m_vkSwapchainImages.size(); i++) {
 			VkImageViewCreateInfo imageViewCreateInfo{};
@@ -287,8 +303,9 @@ namespace LimeStone {
 				throw std::runtime_error("Failed to create image view!");
 			}
 		}
+	}
 
-		// Render pass:
+	void Application::createRenderPass() {
 		VkAttachmentDescription colorAttachment{};
 		colorAttachment.format = m_vkSwapchainImageFormat;
 		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -307,8 +324,9 @@ namespace LimeStone {
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		subpass.colorAttachmentCount = 1;
 		subpass.pColorAttachments = &colorAttachmentRef;
+	}
 
-		// Graphics pipeline creation:
+	void Application::createGraphicsPipeline() {
 		auto vertShaderCode = readFile(m_exeDirPath + "/shaders/vert.spv");
 		auto fragShaderCode = readFile(m_exeDirPath + "/shaders/frag.spv");
 
@@ -327,7 +345,7 @@ namespace LimeStone {
 		fragShaderStageInfo.module = fragShaderModule;
 		fragShaderStageInfo.pName = "main";
 
-		// Dynamic state creation:
+		// Dynamic state creation
 		std::vector<VkDynamicState> dynamicStates = {
 			VK_DYNAMIC_STATE_VIEWPORT,
 			VK_DYNAMIC_STATE_SCISSOR
@@ -432,7 +450,7 @@ namespace LimeStone {
 			throw std::runtime_error("Failed to create pipeline layout!");
 		}
 
-		// Destroying shader modules:
+		// Destroying shader modules
 		vkDestroyShaderModule(m_vkDevice, fragShaderModule, nullptr);
 		vkDestroyShaderModule(m_vkDevice, vertShaderModule, nullptr);
 	}
