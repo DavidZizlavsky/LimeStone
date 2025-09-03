@@ -40,6 +40,8 @@ namespace LimeStone {
 		VkExtent2D m_vkSwapchainExtent;
 		VkPipelineLayout m_vkPipelineLayout = nullptr;
 		std::vector<VkImageView> m_vkSwapchainImageViews;
+		VkRenderPass m_vkRenderPass = nullptr;
+		VkPipeline m_vkGraphicsPipeline = nullptr;
 
 		void initVulkan();
 		void createInstance();

@@ -324,6 +324,17 @@ namespace LimeStone {
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		subpass.colorAttachmentCount = 1;
 		subpass.pColorAttachments = &colorAttachmentRef;
+
+		VkRenderPassCreateInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		renderPassInfo.attachmentCount = 1;
+		renderPassInfo.pAttachments = &colorAttachment;
+		renderPassInfo.subpassCount = 1;
+		renderPassInfo.pSubpasses = &subpass;
+
+		if (vkCreateRenderPass(m_vkDevice, &renderPassInfo, nullptr, &m_vkRenderPass) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create render pass!");
+		}
 	}
 
 	void Application::createGraphicsPipeline() {
@@ -344,6 +355,8 @@ namespace LimeStone {
 		fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 		fragShaderStageInfo.module = fragShaderModule;
 		fragShaderStageInfo.pName = "main";
+
+		VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
 		// Dynamic state creation
 		std::vector<VkDynamicState> dynamicStates = {
@@ -450,13 +463,38 @@ namespace LimeStone {
 			throw std::runtime_error("Failed to create pipeline layout!");
 		}
 
+		// Creating graphics pipeline
+		VkGraphicsPipelineCreateInfo pipelineInfo{};
+		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		pipelineInfo.stageCount = 2;
+		pipelineInfo.pStages = shaderStages;
+		pipelineInfo.pVertexInputState = &vertexInputInfo;
+		pipelineInfo.pInputAssemblyState = &inputAssembly;
+		pipelineInfo.pViewportState = &viewportState;
+		pipelineInfo.pRasterizationState = &rasterizer;
+		pipelineInfo.pMultisampleState = &multisampling;
+		pipelineInfo.pDepthStencilState = nullptr;
+		pipelineInfo.pColorBlendState = &colorBlending;
+		pipelineInfo.pDynamicState = &dynamicStateCreateInfo;
+		pipelineInfo.layout = m_vkPipelineLayout;
+		pipelineInfo.renderPass = m_vkRenderPass;
+		pipelineInfo.subpass = 0;
+		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+		pipelineInfo.basePipelineIndex = -1;
+
+		if (vkCreateGraphicsPipelines(m_vkDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_vkGraphicsPipeline) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create graphics pipeline!");
+		}
+
 		// Destroying shader modules
 		vkDestroyShaderModule(m_vkDevice, fragShaderModule, nullptr);
 		vkDestroyShaderModule(m_vkDevice, vertShaderModule, nullptr);
 	}
 	
 	Application::~Application() {
+		vkDestroyPipeline(m_vkDevice, m_vkGraphicsPipeline, nullptr);
 		vkDestroyPipelineLayout(m_vkDevice, m_vkPipelineLayout, nullptr);
+		vkDestroyRenderPass(m_vkDevice, m_vkRenderPass, nullptr);
 
 		for (auto imageView : m_vkSwapchainImageViews) {
 			vkDestroyImageView(m_vkDevice, imageView, nullptr);
