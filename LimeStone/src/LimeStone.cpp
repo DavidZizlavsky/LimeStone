@@ -490,8 +490,35 @@ namespace LimeStone {
 		vkDestroyShaderModule(m_vkDevice, fragShaderModule, nullptr);
 		vkDestroyShaderModule(m_vkDevice, vertShaderModule, nullptr);
 	}
+
+	void Application::createFramebuffers() {
+		m_vkSwapchainFramebuffers.resize(m_vkSwapchainImageViews.size());
+
+		for (size_t i = 0; i < m_vkSwapchainImageViews.size(); i++) {
+			VkImageView attachments[] = {
+				m_vkSwapchainImageViews[i]
+			};
+
+			VkFramebufferCreateInfo framebufferInfo{};
+			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass = m_vkRenderPass;
+			framebufferInfo.attachmentCount = 1;
+			framebufferInfo.pAttachments = attachments;
+			framebufferInfo.width = m_vkSwapchainExtent.width;
+			framebufferInfo.height = m_vkSwapchainExtent.height;
+			framebufferInfo.layers = 1;
+
+			if (vkCreateFramebuffer(m_vkDevice, &framebufferInfo, nullptr, &m_vkSwapchainFramebuffers[i]) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create framebuffer!");
+			}
+		}
+	}
 	
 	Application::~Application() {
+		for (auto framebuffer : m_vkSwapchainFramebuffers) {
+			vkDestroyFramebuffer(m_vkDevice, framebuffer, nullptr);
+		}
+
 		vkDestroyPipeline(m_vkDevice, m_vkGraphicsPipeline, nullptr);
 		vkDestroyPipelineLayout(m_vkDevice, m_vkPipelineLayout, nullptr);
 		vkDestroyRenderPass(m_vkDevice, m_vkRenderPass, nullptr);

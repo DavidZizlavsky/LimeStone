@@ -42,6 +42,7 @@ namespace LimeStone {
 		std::vector<VkImageView> m_vkSwapchainImageViews;
 		VkRenderPass m_vkRenderPass = nullptr;
 		VkPipeline m_vkGraphicsPipeline = nullptr;
+		std::vector<VkFramebuffer> m_vkSwapchainFramebuffers;
 
 		void initVulkan();
 		void createInstance();
@@ -53,6 +54,7 @@ namespace LimeStone {
 		void createImageViews();
 		void createRenderPass();
 		void createGraphicsPipeline();
+		void createFramebuffers();
 
 		bool checkValidationLayerSupport();
 		std::vector<const char*> getRequiredExtensions();
